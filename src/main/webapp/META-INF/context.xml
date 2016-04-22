@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Context>
+  <Loader delegate="true" />
+  <Valve className="com.orangefunction.tomcat.redissessions.RedisSessionHandlerValve" />
+  <Manager className="com.orangefunction.tomcat.redissessions.RedisSessionManager"
+           host="10.211.55.8"
+           port="6379"
+           database="0"
+           password="fhredispass007"
+           maxInactiveInterval="60" />
+</Context>
