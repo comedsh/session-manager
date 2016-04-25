@@ -63,7 +63,7 @@ public class RedisSessionManager extends ManagerBase implements Lifecycle {
   protected JedisPoolConfig connectionPoolConfig = new JedisPoolConfig();
 
   protected JedisCluster jedisCluster;
-  protected Set<String> clusters;
+  protected Set<String> cluster;
   
   protected RedisSessionHandlerValve handlerValve;
   protected ThreadLocal<RedisSession> currentSession = new ThreadLocal<>();
@@ -177,13 +177,16 @@ public class RedisSessionManager extends ManagerBase implements Lifecycle {
     this.sentinelSet = new HashSet<String>(Arrays.asList(sentinelArray));
   }
 
-  public void setClusters(String clusters){
-	 if(null == clusters){
-	   clusters = "";
+  public void setCluster(String cluster){
+	 
+	  if(null == cluster){
+	   cluster = "";
 	 }
 	  
-	 String[] sentinelArray = clusters.split(",");
-	 this.clusters = new HashSet<String>(Arrays.asList(sentinelArray));  
+	 String[] sentinelArray = cluster.split(",");
+	 
+	 this.cluster = new HashSet<String>(Arrays.asList(sentinelArray));
+	 
   }
   
   public Set<String> getSentinelSet() {
@@ -765,11 +768,11 @@ public class RedisSessionManager extends ManagerBase implements Lifecycle {
         }
       
       // Way 2: Clusters   
-      } else if( this.clusters != null ){
+      } else if( this.cluster != null ){
 
     	  Set<HostAndPort> connectionPoints = new HashSet<HostAndPort>();
     	  
-    	  for( String s : clusters ){
+    	  for( String s : cluster ){
     		  
     		  String[] ss = s.split(":");
     		  

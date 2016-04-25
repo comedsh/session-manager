@@ -52,6 +52,13 @@ task sourcesJar(type: Jar) {
   classifier = 'sources'
 }
 
+// 导出依赖包 
+// @TODO 过滤
+task copyJars(type: Copy) {
+  from configurations.runtime
+  into 'build/libs' // 目标位置
+}
+
 /*
   尝试过配置 WTP 的 Web Deployment Assembly，自动将 tomcat-redis-session-manager 打包到 ${TOMCAT_HOME}/lib 下，可是，默认的路径是 WEB-INF/lib 且不能改变.... 
   所以，写了这个任务，让 Gradle 来执行构建
@@ -63,8 +70,17 @@ task deploy(type:Copy, overwrite:true){
 
 	dependsOn build
 	
+	dependsOn copyJars
+	
 	from 'build/libs/tomcat-redis-session-manager-2.0.0.jar'
 	into '/Users/mac/programs/apache-tomcat-7.0.61/lib'
+	
+	from 'build/libs/commons-pool2-2.4.2.jar'
+	into '/Users/mac/programs/apache-tomcat-7.0.61/lib'
+
+	from 'build/libs/jedis-2.8.1.jar'
+	into '/Users/mac/programs/apache-tomcat-7.0.61/lib'
+	
 	
 }
 
