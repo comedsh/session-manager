@@ -1,4 +1,4 @@
-package com.orangefunction.tomcat.redissessions;
+package org.ranran.tomcat.redissessions;
 
 import java.security.Principal;
 import org.apache.catalina.Manager;

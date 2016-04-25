@@ -1,4 +1,4 @@
-package com.orangefunction.tomcatredissessionmanager.exampleapp;
+package org.ranran.tomcatredissessionmanager.exampleapp;
 
 import java.util.Map;
 
@@ -11,7 +11,7 @@ import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Protocol;
-import com.orangefunction.tomcat.redissessions.*;
+
 import org.apache.catalina.session.StandardSession;
 import org.apache.catalina.session.StandardSessionFacade;
 import org.apache.catalina.core.ApplicationContextFacade;
@@ -22,6 +22,7 @@ import javax.servlet.*;
 
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
+import org.ranran.tomcat.redissessions.*;
 
 public class WebApp implements spark.servlet.SparkApplication {
 

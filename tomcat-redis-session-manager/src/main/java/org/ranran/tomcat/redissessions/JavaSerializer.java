@@ -1,4 +1,4 @@
-package com.orangefunction.tomcat.redissessions;
+package org.ranran.tomcat.redissessions;
 
 import org.apache.catalina.util.CustomObjectInputStream;
 
@@ -73,7 +73,7 @@ public class JavaSerializer implements Serializer {
         BufferedInputStream bis = new BufferedInputStream(new ByteArrayInputStream(data));
         ObjectInputStream ois = new CustomObjectInputStream(bis, loader);
     ) {
-      SessionSerializationMetadata serializedMetadata = (SessionSerializationMetadata)ois.readObject();
+      SessionSerializationMetadata serializedMetadata = (SessionSerializationMetadata) ois.readObject();
       metadata.copyFieldsFrom(serializedMetadata);
       session.readObjectData(ois);
     }

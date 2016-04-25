@@ -1,4 +1,4 @@
-package com.orangefunction.tomcat.redissessions;
+package org.ranran.tomcat.redissessions;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -23,7 +23,6 @@ import org.apache.juli.logging.LogFactory;
 import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisCluster;
-import redis.clients.jedis.JedisCommands;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.JedisSentinelPool;
@@ -75,7 +74,7 @@ public class RedisSessionManager extends ManagerBase implements Lifecycle {
 
   protected static String name = "RedisSessionManager";
 
-  protected String serializationStrategyClass = "com.orangefunction.tomcat.redissessions.JavaSerializer";
+  protected String serializationStrategyClass = "org.ranran.tomcat.redissessions.JavaSerializer";
 
   protected EnumSet<SessionPersistPolicy> sessionPersistPoliciesSet = EnumSet.of(SessionPersistPolicy.DEFAULT);
 
@@ -624,7 +623,7 @@ public class RedisSessionManager extends ManagerBase implements Lifecycle {
 
       if (log.isTraceEnabled()) {
         log.trace("Session Contents [" + redisSession.getId() + "]:");
-        Enumeration en = redisSession.getAttributeNames();
+        Enumeration<?> en = redisSession.getAttributeNames();
         while(en.hasMoreElements()) {
           log.trace("  " + en.nextElement());
         }
@@ -672,6 +671,9 @@ public class RedisSessionManager extends ManagerBase implements Lifecycle {
     } catch (IOException e) {
     	
       log.error(e.getMessage());
+      
+      // 之前莫名其妙的问题，怎么 session 不能将对象保存到 redis 里面了... 加上下面这一行的代码相当的关键.. 就知道原因了，是因为 User 对象没有 implements Serializable.
+      e.printStackTrace();
       
       throw e;
       
@@ -743,10 +745,11 @@ public class RedisSessionManager extends ManagerBase implements Lifecycle {
     // Do nothing.
   }
 
-  private void initializeDatabaseConnection() throws LifecycleException {
+  protected void initializeDatabaseConnection() throws LifecycleException {
 	  
     try {
-    	
+      
+      // Way 1: Master-Slave with Sentinel	
       if (getSentinelMaster() != null) {
         
     	Set<String> sentinelSet = getSentinelSet();
@@ -761,6 +764,7 @@ public class RedisSessionManager extends ManagerBase implements Lifecycle {
         
         }
       
+      // Way 2: Clusters   
       } else if( this.clusters != null ){
 
     	  Set<HostAndPort> connectionPoints = new HashSet<HostAndPort>();
@@ -775,6 +779,7 @@ public class RedisSessionManager extends ManagerBase implements Lifecycle {
     	  
     	  jedisCluster = new JedisCluster( connectionPoints );
       
+      // Way 3: Master-Slave	  
       } else {
       
     	  connectionPool = new JedisPool(this.connectionPoolConfig, getHost(), getPort(), getTimeout(), getPassword());
@@ -793,7 +798,7 @@ public class RedisSessionManager extends ManagerBase implements Lifecycle {
 
   
   
-  private void initializeSerializer() throws ClassNotFoundException, IllegalAccessException, InstantiationException {
+  protected void initializeSerializer() throws ClassNotFoundException, IllegalAccessException, InstantiationException {
     log.info("Attempting to use serializer :" + serializationStrategyClass);
     serializer = (Serializer) Class.forName(serializationStrategyClass).newInstance();
 

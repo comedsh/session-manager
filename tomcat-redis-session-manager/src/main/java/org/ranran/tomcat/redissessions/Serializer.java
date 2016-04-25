@@ -1,4 +1,4 @@
-package com.orangefunction.tomcat.redissessions;
+package org.ranran.tomcat.redissessions;
 
 import javax.servlet.http.HttpSession;
 import java.io.IOException;

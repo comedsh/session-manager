@@ -1,10 +1,17 @@
-package com.orangefunction.tomcat.redissessions;
+package org.ranran.tomcat.redissessions;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
 
 
 public class SessionSerializationMetadata implements Serializable {
 
+  /**
+	 * 
+	 */
+  private static final long serialVersionUID = -211346067829982622L;
+	
   private byte[] sessionAttributesHash;
 
   public SessionSerializationMetadata() {

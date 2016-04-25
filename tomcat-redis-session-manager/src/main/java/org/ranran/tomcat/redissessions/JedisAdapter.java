@@ -1,4 +1,4 @@
-package com.orangefunction.tomcat.redissessions;
+package org.ranran.tomcat.redissessions;
 
 import java.util.Collections;
 import java.util.List;
