@@ -42,12 +42,6 @@ public class SessionSerializationMetadata implements Serializable {
   
   }
 
-//  public void setSerialData( SessionSerializationMetadata metadata ) {
-//	  
-//    this.setSerialData( metadata.getSerialData() );
-//  
-//  }
-
   /**
    * Notice that, when oos.writeObject( metadata ) from {@link JavaSerializer#makeSerialData(RedisSession, SessionSerializationMetadata) } <br>
    * it will invoke this private method to serialize the serial data.<br>

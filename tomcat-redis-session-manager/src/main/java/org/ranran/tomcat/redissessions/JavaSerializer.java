@@ -80,6 +80,7 @@ public class JavaSerializer implements Serializer {
       
     }
     
+    // encrypt the serialized data by MD5, and this is unidirectional, can not be decrypted, so it can not be deserialized.
     return digester.digest( serialized );
     
   }
@@ -128,9 +129,11 @@ public class JavaSerializer implements Serializer {
          ObjectOutputStream oos = new ObjectOutputStream( new BufferedOutputStream( bos ) );
     		
     ) {
-      	
+      
+      // makes the first layer	
       oos.writeObject( metadata );
-
+      
+      // makes the second layer
       session.writeObjectData( oos );
       
       oos.flush(); // write into bos

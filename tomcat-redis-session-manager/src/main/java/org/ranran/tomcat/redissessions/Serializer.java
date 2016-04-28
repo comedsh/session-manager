@@ -8,10 +8,15 @@ public interface Serializer {
   
   /**
    * 
-   * Serialize the session attributes into bytes; <br> 
+   * Serialize the session attributes into bytes; <br>
    * 
-   * then, SessionSerializationMetadata will enwrap the bytes for serialization. <br>
+   * The only usage of it is to provide the easiest way to compare the attributes key-values between the old attributes and the updated attributes <br>
    * 
+   * @see RedisSessionManager#saveInternal(JedisAdapter, org.apache.catalina.Session, boolean), the code line as below <br>
+   * 
+   * Arrays.equals( originalSessionAttributesBytes, ( sessionAttributesBytes = serializer.makeBindaryData( redisSession ) ) ); <br>
+   * 
+   * if different, then synchronizes with redis 
    * 
    * @param session
    * @return

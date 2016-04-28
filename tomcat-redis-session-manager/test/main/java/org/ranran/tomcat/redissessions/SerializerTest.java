@@ -5,6 +5,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
 
 import org.apache.catalina.core.StandardContext;
 import org.apache.catalina.util.CustomObjectInputStream;
@@ -28,13 +30,13 @@ public class SerializerTest {
 
 	
 	/**
-	 * 目的是去搞懂 tomcat-redis-session-manager 本身的 serialize 和 deserialize 的逻辑关系 
+	 * 验证 serialize 的两层结构 
 	 * 
 	 * @throws IOException
 	 * @throws ClassNotFoundException 
 	 */
 	@Test
-	public void testSerialize1() throws IOException, ClassNotFoundException{
+	public void testSerialize() throws IOException, ClassNotFoundException{
 		
 		RedisSessionManager manager = new RedisSessionManager();
 		
@@ -52,31 +54,49 @@ public class SerializerTest {
 		
 		JavaSerializer serializer = new JavaSerializer();
 		
-		byte[] serialdata_1 = serializer.makeBindaryData(session);
-		
 		SessionSerializationMetadata metadata = new SessionSerializationMetadata();
 		
-		metadata.setSerialData( serialdata_1 );
+		metadata.setSerialData( serializer.makeBindaryData(session) );
 		
-		byte[] serialdata_2 = serializer.makeSerialData( session, metadata );
+		byte[] serialdata = serializer.makeSerialData( session, metadata );
 		
-		Assert.assertFalse( "serial data 2 是序列化的封装了键值的对象 metadata, 而 serial data 1 是直接序列化的键值",  Arrays.equals( serialdata_1, serialdata_2 ) );
+		// 验证 serialdata 包含两层结构
 		
-		// 从打印的结果可见，二者的序列化值是不同的。
-		System.out.println("seria data 1: " + new String(serialdata_1) );
+		// deserialize from the bytes
 		
-		System.out.println("seria data 2: " + new String(serialdata_2) );
+        BufferedInputStream bis = new BufferedInputStream( new ByteArrayInputStream(serialdata) );
 		
-        BufferedInputStream bis = new BufferedInputStream(new ByteArrayInputStream( serialdata_2 ));
-			
-        @SuppressWarnings("resource")
-		ObjectInputStream ois = new CustomObjectInputStream( bis, null );
-				
-        SessionSerializationMetadata smetadata = ( SessionSerializationMetadata ) ois.readObject();		
-	
-		Assert.assertTrue("the key-value serial data should be the same", Arrays.equals(serialdata_1, smetadata.getSerialData() ) );
+        ObjectInputStream ois = new CustomObjectInputStream( bis, null );
+        
+        // read the first layer
+        SessionSerializationMetadata serializedMetadata = ( SessionSerializationMetadata ) ois.readObject();
+        
+        try{
+        	
+	        ObjectInputStream os = new ObjectInputStream( new ByteArrayInputStream( serializedMetadata.getSerialData() ) );
+	        
+	        @SuppressWarnings("unchecked")
+			HashMap<String,Object> attributes = (HashMap<String,Object>) os.readObject();
+	        
+	        for( Iterator<String> iter = attributes.keySet().iterator(); iter.hasNext(); ){
+	        	
+	        	String key = iter.next();
+	        	
+	        	System.out.println("key: "+ key + "; values: " + attributes.get(key) );
+	        	
+	        }
+        
+        }catch( Exception e ){
+        	
+        	Assert.assertTrue("cannot be deserialized because the serial data has been encrypted one-way by MessageDigest", true);
+        	
+        }
+        // read the second layer, deserializes those serial objects back into session.
+        session.readObjectData( ois );       		
 		
 	}
+	
+	
 	
 	
 }

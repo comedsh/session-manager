@@ -35,7 +35,7 @@ public class RedisSessionManagerTest {
 	 * Notice, you can't use keys * to find all keys from the redis cluster environment instead you need to check it on each node separately by keys *
 	 *  
 	 */
-	static final String SESSION_ID = "A7F0A15B01AE1732F75EA2846380CBD5";
+	static final String SESSION_ID = "9654F19ECA0A78640B9C0E6D6CDC3848";
 	
 	
 	/**
@@ -50,6 +50,8 @@ public class RedisSessionManagerTest {
 	 * 3. 替换 SESSION_ID
 	 * 
 	 * 特别注意，开始测试时，记得要启动 redis Master-Slave 环境，同样将 Tomcat 配置为 redis master-slave 模式。
+	 * 
+	 * THIS IS ONLY USED FOR REDIS MASTER-SLAVE MODEL.
 	 * 
 	 * @throws IOException
 	 * @throws LifecycleException

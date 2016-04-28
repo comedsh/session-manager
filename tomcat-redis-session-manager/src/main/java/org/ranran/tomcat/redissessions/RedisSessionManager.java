@@ -453,6 +453,7 @@ public class RedisSessionManager extends ManagerBase implements Lifecycle {
 
   @Override
   public Session findSession(String id) throws IOException {
+	  
     RedisSession session = null;
 
     if (null == id) {
@@ -561,6 +562,7 @@ public class RedisSessionManager extends ManagerBase implements Lifecycle {
   }
 
   public DeserializedSessionContainer sessionFromSerializedData(String id, byte[] data) throws IOException {
+	  
     log.trace("Deserializing session " + id + " from Redis");
 
     if (Arrays.equals(NULL_SESSION, data)) {
@@ -569,12 +571,13 @@ public class RedisSessionManager extends ManagerBase implements Lifecycle {
     }
 
     RedisSession session = null;
+    
     SessionSerializationMetadata metadata = new SessionSerializationMetadata();
 
     try {
       session = (RedisSession)createEmptySession();
 
-      serializer.deserialize(data, session, metadata);
+      serializer.deserialize( data, session, metadata );
 
       session.setId(id);
       session.setNew(false);
@@ -596,6 +599,7 @@ public class RedisSessionManager extends ManagerBase implements Lifecycle {
     }
 
     return new DeserializedSessionContainer(session, metadata);
+    
   }
 
   public void save(Session session) throws IOException {
@@ -984,10 +988,17 @@ public class RedisSessionManager extends ManagerBase implements Lifecycle {
 }
 
 class DeserializedSessionContainer {
+	
   public final RedisSession session;
+  
   public final SessionSerializationMetadata metadata;
+  
   public DeserializedSessionContainer(RedisSession session, SessionSerializationMetadata metadata) {
+	  
     this.session = session;
+    
     this.metadata = metadata;
+    
   }
+  
 }
