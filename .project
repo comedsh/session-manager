@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>session-manager</name>
+	<name>session-manager-web</name>
 	<comment></comment>
 	<projects>
-		<project>session-manager</project>
+		<project>session-manager-web</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
@@ -37,7 +37,7 @@
 	</natures>
 	<filteredResources>
 		<filter>
-			<id>0</id>
+			<id>1461807739730</id>
 			<name></name>
 			<type>26</type>
 			<matcher>
