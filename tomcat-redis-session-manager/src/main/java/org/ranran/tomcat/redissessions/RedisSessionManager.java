@@ -232,6 +232,7 @@ public class RedisSessionManager extends ManagerBase implements Lifecycle {
     
   }
   
+  @SuppressWarnings("deprecation")
   protected void returnConnection(Jedis jedis, Boolean error) {
     if (error) {
       connectionPool.returnBrokenResource(jedis);
@@ -293,6 +294,7 @@ public class RedisSessionManager extends ManagerBase implements Lifecycle {
    */
   @Override
   protected synchronized void startInternal() throws LifecycleException {
+	  
     super.startInternal();
 
     setState(LifecycleState.STARTING);
@@ -326,6 +328,7 @@ public class RedisSessionManager extends ManagerBase implements Lifecycle {
     initializeDatabaseConnection();
 
     setDistributable(true);
+    
   }
 
 
@@ -571,7 +574,7 @@ public class RedisSessionManager extends ManagerBase implements Lifecycle {
     try {
       session = (RedisSession)createEmptySession();
 
-      serializer.deserializeInto(data, session, metadata);
+      serializer.deserialize(data, session, metadata);
 
       session.setId(id);
       session.setNew(false);
@@ -582,7 +585,7 @@ public class RedisSessionManager extends ManagerBase implements Lifecycle {
 
       if (log.isTraceEnabled()) {
         log.trace("Session Contents [" + id + "]:");
-        Enumeration en = session.getAttributeNames();
+        Enumeration<?> en = session.getAttributeNames();
         while(en.hasMoreElements()) {
           log.trace("  " + en.nextElement());
         }
@@ -615,11 +618,13 @@ public class RedisSessionManager extends ManagerBase implements Lifecycle {
     }
   }
 
+  @SuppressWarnings("finally")
   protected boolean saveInternal(JedisAdapter jedis, Session session, boolean forceSave) throws IOException {
 	  
     Boolean error = true;
 
     try {
+    	
       log.trace("Saving session " + session + " into Redis");
 
       RedisSession redisSession = (RedisSession)session;
@@ -636,35 +641,41 @@ public class RedisSessionManager extends ManagerBase implements Lifecycle {
 
       Boolean isCurrentSessionPersisted;
       SessionSerializationMetadata sessionSerializationMetadata = currentSessionSerializationMetadata.get();
-      byte[] originalSessionAttributesHash = sessionSerializationMetadata.getSessionAttributesHash();
-      byte[] sessionAttributesHash = null;
+      byte[] originalSessionAttributesBytes = sessionSerializationMetadata.getSerialData();
+      byte[] sessionAttributesBytes = null;
       if (
-           forceSave
+              forceSave
            || redisSession.isDirty()
            || null == (isCurrentSessionPersisted = this.currentSessionIsPersisted.get())
-            || !isCurrentSessionPersisted
-           || !Arrays.equals(originalSessionAttributesHash, (sessionAttributesHash = serializer.attributesHashFrom(redisSession)))
-         ) {
+           || !isCurrentSessionPersisted
+           || !Arrays.equals( originalSessionAttributesBytes, ( sessionAttributesBytes = serializer.makeBindaryData( redisSession ) ) )
+         ) 
+      {
 
         log.trace("Save was determined to be necessary");
 
-        if (null == sessionAttributesHash) {
-          sessionAttributesHash = serializer.attributesHashFrom(redisSession);
+        if (null == sessionAttributesBytes) {
+          sessionAttributesBytes = serializer.makeBindaryData( redisSession );
         }
 
         SessionSerializationMetadata updatedSerializationMetadata = new SessionSerializationMetadata();
-        updatedSerializationMetadata.setSessionAttributesHash(sessionAttributesHash);
         
-        jedis.set(binaryId, serializer.serializeFrom(redisSession, updatedSerializationMetadata));
+        updatedSerializationMetadata.setSerialData( sessionAttributesBytes );
+        
+        jedis.set( binaryId, serializer.makeSerialData( redisSession, updatedSerializationMetadata ) );
 
         redisSession.resetDirtyTracking();
-        currentSessionSerializationMetadata.set(updatedSerializationMetadata);
+        
+        currentSessionSerializationMetadata.set( updatedSerializationMetadata );
+        
         currentSessionIsPersisted.set(true);
+        
       } else {
         log.trace("Save was determined to be unnecessary");
       }
 
       log.trace("Setting expire timeout on session [" + redisSession.getId() + "] to " + getMaxInactiveInterval());
+      
       jedis.expire(binaryId, getMaxInactiveInterval());
 
       error = false;
@@ -802,7 +813,9 @@ public class RedisSessionManager extends ManagerBase implements Lifecycle {
   
   
   protected void initializeSerializer() throws ClassNotFoundException, IllegalAccessException, InstantiationException {
-    log.info("Attempting to use serializer :" + serializationStrategyClass);
+    
+	log.info("Attempting to use serializer :" + serializationStrategyClass);
+    
     serializer = (Serializer) Class.forName(serializationStrategyClass).newInstance();
 
     Loader loader = null;
@@ -816,7 +829,9 @@ public class RedisSessionManager extends ManagerBase implements Lifecycle {
     if (loader != null) {
       classLoader = loader.getClassLoader();
     }
-    serializer.setClassLoader(classLoader);
+    
+    serializer.setClassLoader( classLoader );
+    
   }
 
 
