@@ -109,11 +109,15 @@ public class JavaSerializer implements Serializer {
    * 
    * 疑问，第一级和第二级对 session key-value 重复序列化操作，因为两者是相同的，作者为什么要重复做这个序列化的操作？
    * 1. 难道是为了方便 Array.equals() ( @see RedisSessionManager#saveInternal(JedisAdapter, org.apache.catalina.Session, boolean) 方法中的) ?
+<<<<<<< HEAD
    * 2. 不能直接使用 session.writeObjectData( out ) 所产生的序列化对象来进行对比，因为里面提供了很多额外的动态的信息，时间... 这个是没办法通过 Arrays.equals() 来进行比较的.. 而且这个也不是用来判断是否发生变更的
    *    所以，作者为了能够进行 compare，进行了数据的冗余存储..
    * 3. 为了方便，可以通过 session.readObjectData( in ) 直接进行反序列化.. 
    *   
    * -> 所以，为了能够比较和反序列化的方便，作者采用了冗余的做法..
+=======
+   * 2. ... 
+>>>>>>> branch 'master' of https://github.com/comedsh/tomcat-reis-session-manager.git
    * 
    */
   @Override
