@@ -623,7 +623,7 @@ public class RedisSessionManager extends ManagerBase implements Lifecycle {
   }
 
   @SuppressWarnings("finally")
-  protected boolean saveInternal(JedisAdapter jedis, Session session, boolean forceSave) throws IOException {
+  protected boolean saveInternal( JedisAdapter jedis, Session session, boolean forceSave ) throws IOException {
 	  
     Boolean error = true;
 
@@ -652,6 +652,8 @@ public class RedisSessionManager extends ManagerBase implements Lifecycle {
            || redisSession.isDirty()
            || null == (isCurrentSessionPersisted = this.currentSessionIsPersisted.get())
            || !isCurrentSessionPersisted
+           // 最后的守护者，如果 !isDirty (比如通过 list.add() / list.delete()，但实际上已经 dirty )，仍然可以通过下面这个判断判，去判断是否需要 save into redis.
+           // risk: originalSessionAttributesBytes 从 threadlocal 中取虽然取得了性能上的优势，但增加了 JVM 的内存负荷.. 这里有内存风险
            || !Arrays.equals( originalSessionAttributesBytes, ( sessionAttributesBytes = serializer.makeBindaryData( redisSession ) ) )
          ) 
       {
